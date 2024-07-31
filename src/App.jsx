@@ -1,11 +1,35 @@
-
+import './App.css'
 import Search from './components/Search'
 import Table from './components/Table'
 import { Data } from './data/Data'
 import { useState } from 'react'
-
+import ReactPaginate from 'react-paginate'
+import { Pagination } from "flowbite-react";
 function App() {
   const [search, setSearch] = useState('')
+  const [user, setUser] = useState(Data.slice(0, 100));
+  const [pageNumber, setPageNumber] = useState(0);
+  const userPerpage = 10;
+  const pagesVisited = pageNumber * userPerpage;
+  const displayUser = user
+    .slice(pagesVisited, pagesVisited + userPerpage)
+    .filter((itemS) => {
+      return search === "" || itemS.first_name.toLowerCase().includes(search.toLowerCase()) , itemS.last_name.toLowerCase().includes(search.toLowerCase())
+    })
+    .map((item, index) => {
+      return (
+        <Table
+          key={index.id}
+          id={item.id}
+          firstName={item.first_name}
+          lastName={item.last_name}
+          email={item.email}
+          phone={item.Phone}
+        />
+      )
+    })
+    const onPageChange = (page) => setPageNumber(page - 1); 
+    const pageCount = Math.ceil(user.length / userPerpage);
 
   return (
     <>
@@ -45,27 +69,36 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                {
-                  Data.filter((itemS) => {
-                    return search === "" ? itemS : itemS.first_name.toLowerCase().includes(search.toLowerCase())
-                  }).map((item, index) => {
-                    return (
-                      <Table
-                        key={index}
-                        id={item.id}
-                        firstName={item.first_name}
-                        lastName={item.last_name}
-                        email={item.email}
-                        phone={item.Phone}
-                      />
-                    )
-                  })
-
-                }
-
+                {displayUser}
               </tbody>
             </table>
           </div>
+          <div className="flex overflow-x-auto sm:justify-center">
+            <Pagination
+              layout="pagination"
+              currentPage={pageNumber + 1}
+              totalPages={pageCount}
+              onPageChange={onPageChange}
+              previousLabel="previose"
+              nextLabel="Next"
+              showIcons
+            />
+          </div>
+          {/* <div>
+            <ReactPaginate
+              previousLabel={"Previous"}
+              nextLabel={"Next"}
+              pageCount={Math.ceil(user.length / userPerpage)}
+              onPageChange={({ selected }) => {
+                setPageNumber(selected)
+              }}
+              containerClassName={"paginationBttns"}
+              previousLinkClassName={"previousBttn"}
+              nextLinkClassName={"nextBttn"}
+              disabledClassName={"paginationDisabled"}
+              activeClassName={"paginationActive"}
+            />
+          </div> */}
         </section>
 
       </main>
